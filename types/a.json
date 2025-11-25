@@ -1,0 +1,30 @@
+{
+    "event": "message",
+    "task_id": "2d1bbd86-1c8c-421a-b820-c920c02cf114",
+    "id": "f4002a39-698b-4361-bbc0-306bd476e2ed",
+    "message_id": "f4002a39-698b-4361-bbc0-306bd476e2ed",
+    "conversation_id": "6fcc0ae6-a00b-4565-88a8-f2571edbee8a",
+    "mode": "advanced-chat",
+    "answer": "As of now, the **iPhone 13 Pro Max** (released in September 2021) has the following key specifications:\n\n### **Display**\n- **Size**: 6.7 inches (diagonal)\n- **Type**: Super Retina XDR OLED\n- **Resolution**: 2796 x 1290 pixels (~458 ppi)\n- **Refresh Rate**: 120Hz ProMotion (adaptive refresh rate from 10\u2013120Hz)\n- **Brightness**: Up to 1,000 nits (typical), up to 1,600 nits (HDR)\n\n### **Design & Build**\n- **Materials**: Surgical-grade stainless steel frame, glass front and back\n- **Water & Dust Resistance**: IP68 (up to 6 meters for 30 minutes)\n\n### **Chipset**\n- **Processor**: A15 Bionic chip (5-nanometer process)\n- **GPU**: 5-core GPU\n\n### **Storage Options**\n- 128GB, 256GB, 512GB, 1TB\n\n### **Camera System (Rear)**\n- **Main Camera**:\n  - 12MP, f/1.5 aperture\n  - Sensor-shift optical image stabilization (OIS)\n  - 2x optical zoom\n- **Ultra-Wide Camera**:\n  - 12MP, f/2.4 aperture\n  - 120\u00b0 field of view\n- **Telephoto Camera**:\n  - 12MP, f/2.8 aperture\n  - 3x optical zoom (up to 15x digital zoom)\n- **Features**:\n  - Cinematic mode (with depth control)\n  - Photographic Styles\n  - Macro photography (via software)\n  - ProRAW and ProRes video recording (on select models)\n  - Night mode on all cameras\n  - 4K video at up to 60fps with Dolby Vision HDR\n\n### **Front Camera (TrueDepth)**\n- 12MP, f/1.9 aperture\n- Supports Face ID\n- Portrait mode, Night mode, 4K video at 60fps\n\n### **Battery & Charging**\n- **Battery Life**:\n  - Up to 28 hours video playback (iOS 15+)\n  - Up to 25 hours video playback (video calling)\n- **Charging**:\n  - USB-C port (introduced with iPhone 15 series; *iPhone 13 Pro Max uses Lightning*)\n  - Wireless charging (Qi-compatible)\n  - MagSafe support\n  - Fast charging: up to 50% in ~30 minutes (using 20W or higher adapter)\n\n### **Connectivity**\n- **Networks**: LTE Advanced Pro (4G), 5G (mmWave and sub-6GHz)\n- **Wi-Fi**: Wi-Fi 6 (802.11ax)\n- **Bluetooth**: Bluetooth 5.0\n- **GPS**: Dual-band GPS, GLONASS, Galileo, QZSS\n- **NFC**: Yes (for Apple Pay, etc.)\n\n### **Operating System**\n- Ships with iOS 15 (upgradable to latest iOS version, e.g., iOS 17 or 18)\n\n### **Colors Available**\n- Graphite (stainless steel)\n- Gold\n- Silver\n- Sierra Blue (limited release)\n\n> \u26a0\ufe0f Note: The iPhone 13 Pro Max is no longer in production. Apple has replaced it with the **iPhone 15 Pro Max** (released in September 2023), which features a titanium frame, USB-C port, and the A17 Pro chip.\n\nLet me know if you\u2019d like a comparison between the iPhone 13 Pro Max and newer models!",
+    "metadata": {
+        "annotation_reply": null,
+        "retriever_resources": [],
+        "usage": {
+            "prompt_tokens": 21,
+            "prompt_unit_price": "0.00015",
+            "prompt_price_unit": "0.001",
+            "prompt_price": "0.0000032",
+            "completion_tokens": 816,
+            "completion_unit_price": "0.0015",
+            "completion_price_unit": "0.001",
+            "completion_price": "0.001224",
+            "total_tokens": 837,
+            "total_price": "0.0012272",
+            "currency": "RMB",
+            "latency": 6.862,
+            "time_to_first_token": 0.502,
+            "time_to_generate": 6.496
+        }
+    },
+    "created_at": 1763969679
+}

@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* 1. 隐藏滚动条 (可选，如果您希望它完全不占空间) */
+/* .custom-scrollbar {
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+} */
+
+/* 2. 定义滚动条轨道的宽度/高度 */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px; /* 垂直滚动条宽度 */
+  height: 6px; /* 水平滚动条高度 */
+}
+
+/* 3. 滚动条的轨道背景 */
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent ;
+  border-radius: 10px;
+}
+
+/* 4. 滚动条的滑块样式 */
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #a0aec0; /* 默认颜色：中灰色 */
+  border-radius: 10px;
+  /* 可以在这里添加悬停效果 */
+}
+
+/* 5. 滚动条滑块悬停时的样式 */
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #718096; /* 深灰色 */
+}
