@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, Pressable } from "react-native";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { ThemeToggleButton } from "@/components/ThemeSliderToggle";
 
 interface TopBarProps {
   theme: "dark" | "light";
@@ -22,12 +23,12 @@ export const TopBar: React.FC<TopBarProps> = ({ theme, toggleTheme, onOpenDrawer
             <Text style={{ color: textColor, fontSize: 20 }}>☰</Text>
           </Pressable>
         )}
-        <Text style={{ fontWeight: "bold", fontSize: 16, color: textColor }}>AI 聊天</Text>
+        <Text style={{ fontWeight: "bold", fontSize: 16, color: textColor }}>DUDU 🐷</Text>
       </View>
 
-      <Pressable onPress={toggleTheme}>
-        <Text style={{ color: textColor }}>{theme === "dark" ? "浅色模式" : "深色模式"}</Text>
-      </Pressable>
+      <ThemeToggleButton theme={theme} onToggle={toggleTheme} />
+
+
     </View>
   );
 };

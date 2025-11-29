@@ -190,7 +190,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           // ⭐ 更新 placeholder 提示
           placeholder={totalAttachments > 0 ? `添加文字描述 (共${totalAttachments}个附件)...` : "发送消息..."}
           placeholderTextColor="#888"
-          className={`flex-1 rounded-full pl-5 pt-3 ${inputBg} text-black text-base h-4/5 custom-scrollbar`}
+          className={`flex-1 rounded-full pl-5 pr-5 pt-3 ${inputBg} text-black text-base h-4/5 custom-scrollbar overflow-auto`}
           multiline
           returnKeyType="send"
           onSubmitEditing={handleSend}

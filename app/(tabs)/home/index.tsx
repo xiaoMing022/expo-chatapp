@@ -152,24 +152,24 @@ export default function HomeScreen() {
     console.log("上传按钮被点击");
     // 弹出选择菜单
     Alert.alert(
-        "选择上传内容",
-        "您想上传图片/视频，还是其他类型文件（如 PDF, DOCX 等）?",
-        [
-            {
-                text: "图片/视频",
-                onPress: pickImage, // 调用图片选择函数
-            },
-            {
-                text: "其他文件",
-                onPress: handleDocumentPicker, // 调用文件选择函数
-            },
-            {
-                text: "取消",
-                style: "cancel"
-            }
-        ]
+      "选择上传内容",
+      "您想上传图片/视频，还是其他类型文件（如 PDF, DOCX 等）?",
+      [
+        {
+          text: "图片/视频",
+          onPress: pickImage, // 调用图片选择函数
+        },
+        {
+          text: "其他文件",
+          onPress: handleDocumentPicker, // 调用文件选择函数
+        },
+        {
+          text: "取消",
+          style: "cancel"
+        }
+      ]
     );
-};
+  };
 
   // ⭐⭐⭐ 逻辑更新：支持多图选择，并添加到 pendingImages 数组 ⭐⭐⭐
   const pickImage = async () => {
@@ -191,42 +191,72 @@ export default function HomeScreen() {
   };
 
   // 2. 处理通用文件选择的函数
-// ----------------------------------------------------
-const handleDocumentPicker = async () => {
+  // ----------------------------------------------------
+  const handleDocumentPicker = async () => {
     try {
-        // 在 Web 和某些平台上，DocumentPicker 不需要额外的权限
-        
-        const result = await DocumentPicker.getDocumentAsync({
-            // 选择所有文件类型
-            type: '*/*', 
-            copyToCacheDirectory: true, // 建议复制到缓存目录，以确保 URI 可用
-            multiple: true, // 启用多选
-        });
+      // 在 Web 和某些平台上，DocumentPicker 不需要额外的权限
 
-        // 检查是否取消或发生错误
-        if (result.canceled) {
-            return; 
-        }
+      const result = await DocumentPicker.getDocumentAsync({
+        // 选择所有文件类型
+        type: '*/*',
+        copyToCacheDirectory: true, // 建议复制到缓存目录，以确保 URI 可用
+        multiple: true, // 启用多选
+      });
 
-        // 格式化结果为 PendingFile 接口需要的格式
-        const newFiles = result.assets.map(asset => ({
-            uri: asset.uri,
-            name: asset.name,
-            mimeType: asset.mimeType || 'application/octet-stream', // 使用 mimeType
-            size: asset.size || 0,
-        }));
-        
-        // 更新文件状态
-        setPendingFiles(prev => [...prev, ...newFiles]);
+      // 检查是否取消或发生错误
+      if (result.canceled) {
+        return;
+      }
 
-        // 滚动到底部 (假设 scrollRef 可用)
-        // setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
+      // 格式化结果为 PendingFile 接口需要的格式
+      const newFiles = result.assets.map(asset => ({
+        uri: asset.uri,
+        name: asset.name,
+        mimeType: asset.mimeType || 'application/octet-stream', // 使用 mimeType
+        size: asset.size || 0,
+      }));
+
+      // 更新文件状态
+      setPendingFiles(prev => [...prev, ...newFiles]);
+
+      // 滚动到底部 (假设 scrollRef 可用)
+      // setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
 
     } catch (error) {
-        console.error("文件选择失败:", error);
-        alert("文件选择失败，请重试。");
+      console.error("文件选择失败:", error);
+      alert("文件选择失败，请重试。");
     }
-};
+  };
+
+  const handleRenameConversation = (id: string, newName: string) => {
+    setConversations((prev) =>
+      prev.map((conv) =>
+        // 找到 id 匹配的会话，复制它并修改 title，其他会话保持不变
+        conv.id === id ? { ...conv, title: newName } : conv
+      )
+    );
+  };
+
+  // 处理删除 (包含智能切换逻辑)
+  const handleDeleteConversation = (id: string) => {
+    // 1. 先过滤出删除后的新列表
+    const newConversations = conversations.filter((c) => c.id !== id);
+
+    // 2. 更新列表状态
+    setConversations(newConversations);
+
+    // 3. 【重要】如果删除的是“当前选中的会话”，需要切换选中状态
+    if (id === activeConvId) {
+      if (newConversations.length > 0) {
+        // 还有其他会话，自动切换到第一个
+        setActiveConvId(newConversations[0].id);
+      } else {
+        // 如果删光了，创建一个新的默认会话 (这里假设你有一个 createConversation 函数)
+        // 如果没有 createConversation，可以设为空字符串或 null
+        createConversation();
+      }
+    }
+  };
 
   return (
     <View className={`flex-1 ${theme === "dark" ? "bg-black" : "bg-gray-100"}`}>
@@ -248,6 +278,8 @@ const handleDocumentPicker = async () => {
               setActiveConvId={setActiveConvId}
               createConversation={createConversation}
               theme={theme}
+              onRenameConversation={handleRenameConversation}
+              onDeleteConversation={handleDeleteConversation}
             />
           )}
 
@@ -257,18 +289,6 @@ const handleDocumentPicker = async () => {
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             keyboardVerticalOffset={Platform.OS === "ios" ? TAB_BAR_HEIGHT : 0}
           >
-            {/* <ScrollView
-              ref={scrollRef}
-              contentContainerStyle={{ paddingVertical: 16, paddingHorizontal: 12 }}
-              className="custom-scrollbar"
-            >
-              {messages.map(msg => (
-                <MessageBubble key={msg.id} msg={msg} theme={theme} />
-              ))}
-
-
-              <View style={{ height: 16 }} />
-            </ScrollView> */}
             <MessageList messages={messages} theme={theme} ref={scrollRef} />
 
             {/* ⭐⭐⭐ ChatInput 属性更新 ⭐⭐⭐ */}
@@ -280,8 +300,8 @@ const handleDocumentPicker = async () => {
               pendingFiles={pendingFiles}
               setPendingFiles={setPendingFiles}
               onSend={sendMessage}
-              // onUpload={pickImage}
-              onUpload={handleUpload}
+              onUpload={pickImage}
+              // onUpload={handleUpload}
               theme={theme}
               streaming={streaming}
             />
@@ -297,6 +317,8 @@ const handleDocumentPicker = async () => {
             setActiveConvId={setActiveConvId}
             createConversation={createConversation}
             theme={theme}
+            onRenameConversation={handleRenameConversation}
+            onDeleteConversation={handleDeleteConversation}
           />
         )}
       </SafeAreaView>
