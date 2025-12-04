@@ -1,274 +1,102 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  View,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
-  ScrollView,
-} from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import * as DocumentPicker from "expo-document-picker";
-
-import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { View, KeyboardAvoidingView, Platform, Alert, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 
+// UI Components
 import { TopBar } from "@components/chat/TopBar";
 import { DrawerMenu } from "@components/chat/DrawerMenu";
-// 确保 ChatInput 的 props 已经更新以匹配多图支持
 import { ChatInput } from "@components/chat/ChatInput";
 import { MessageList } from "@components/chat/MessageList";
 
+// Logic Hooks
+import { useAttachments } from "@/hooks/useAttachments";
+import { useChatSession } from "@/hooks/useChatSession";
+import { UploadModal } from "@/components/chat/UploadModal";
+
+// Types
 type Theme = "light" | "dark";
-
-import { Message, PendingFile } from "@/types/types";
-
-
-
-interface Conversation {
-  id: string;
-  title: string;
-  messages: Message[];
-  updatedAt: number;
-}
-
-// 假设底部 Tab 栏高度，用于 iOS 上的 KeyboardAvoidingView 偏移计算
 const TAB_BAR_HEIGHT = 50;
 
 export default function HomeScreen() {
   const { isLarge, isSmall } = useBreakpoint();
-
   const [theme, setTheme] = useState<Theme>("light");
-  const [open, setOpen] = useState(false);
-
+  const [openDrawer, setOpenDrawer] = useState(false);
   const [input, setInput] = useState("");
-  const [streaming, setStreaming] = useState(false);
-
-  const [conversations, setConversations] = useState<Conversation[]>([
-    {
-      id: "c1",
-      title: "示例会话1",
-      messages: [
-        {
-          id: "m1",
-          role: "assistant",
-          type: "final",
-          content: "欢迎使用 AI 助手！",
-        },
-      ],
-      updatedAt: Date.now(),
-    },
-  ]);
-
-  const [activeConvId, setActiveConvId] = useState(conversations[0].id);
-  const [messages, setMessages] = useState<Message[]>(conversations[0].messages);
-  // ⭐⭐⭐ 状态更新：支持多个待发送图片 URI 数组 ⭐⭐⭐
-  const [pendingImages, setPendingImages] = useState<string[]>([]);
-
-  // ⭐ 关键：新增 pendingFiles 状态，并初始化为空数组
-  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
-
   const scrollRef = useRef<ScrollView>(null);
 
-  // 更新 messages 当 activeConvId 或 conversations 变化
-  useEffect(() => {
-    const conv = conversations.find(c => c.id === activeConvId);
-    setMessages(conv ? conv.messages : []);
-  }, [activeConvId, conversations]);
+  const [uploadModalVisible, setUploadModalVisible] = useState(false);
 
-  // 自动滚动到底部
-  useEffect(() => {
-    // 滚动时依赖 messages 和 pendingImages 确保内容和预览图出现后滚动
-    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
-  }, [messages, pendingImages]);
+  const {
+    conversations,
+    activeConvId,
+    setActiveConvId,
+    messages,
+    streaming,
+    createConversation,
+    renameConversation,
+    deleteConversation,
+    handleSendMessage,
+  } = useChatSession();
 
-  // 新增消息到当前会话
-  const pushMessage = (msg: Message) => {
-    setMessages(prev => {
-      const newMsgs: Message[] = [...prev, msg];
-      setConversations(convs =>
-        convs.map(c =>
-          c.id === activeConvId ? { ...c, messages: newMsgs, updatedAt: Date.now() } : c
-        )
-      );
-      return newMsgs;
-    });
-  };
+  const {
+    pendingImages,
+    setPendingImages,
+    pendingFiles,
+    setPendingFiles,
+    pickImage,
+    pickDocument,
+    clearAttachments,
+  } = useAttachments();
 
-  // 发送消息
-  const sendMessage = () => {
-    // ⭐⭐⭐ 逻辑更新：检查 pendingImages 数组长度 ⭐⭐⭐
-    if (!input.trim() && pendingImages.length === 0) return;
 
-    const newMessages: Message[] = [];
-
-    // ⭐⭐⭐ 逻辑更新：遍历 pendingImages 数组，将每张图作为消息发送 ⭐⭐⭐
-    if (pendingImages.length > 0) {
-      pendingImages.forEach(uri => {
-        newMessages.push({
-          id: `i_${Date.now()}_${Math.random()}`,
-          role: "user",
-          type: "image",
-          content: uri,
-        });
-      });
-      setPendingImages([]); // 清空待发送图片
-    }
-
-    if (input.trim()) {
-      newMessages.push({
-        id: `u_${Date.now()}`,
-        role: "user",
-        type: "final",
-        content: input.trim(),
-      });
-      setInput("");
-    }
-
-    if (newMessages.length > 0) {
-      newMessages.forEach(msg => pushMessage(msg));
-
-      // 模拟 AI 回复
-      pushMessage({
-        id: `a_${Date.now()}`,
-        role: "assistant",
-        type: "final",
-        content: "这是模拟回答。",
-      });
-
-      setTimeout(() => {
-        scrollRef.current?.scrollToEnd({ animated: true });
-      }, 50);
-    }
-  };
-
-  const createConversation = () => {
-    const id = `c_${Date.now()}`;
-    const newConv: Conversation = { id, title: "新会话", messages: [], updatedAt: Date.now() };
-    setConversations(prev => [newConv, ...prev]);
-    setActiveConvId(id);
-  };
-
-  const handleUpload = async () => {
-    console.log("上传按钮被点击");
-    // 弹出选择菜单
-    Alert.alert(
-      "选择上传内容",
-      "您想上传图片/视频，还是其他类型文件（如 PDF, DOCX 等）?",
-      [
-        {
-          text: "图片/视频",
-          onPress: pickImage, // 调用图片选择函数
-        },
-        {
-          text: "其他文件",
-          onPress: handleDocumentPicker, // 调用文件选择函数
-        },
-        {
-          text: "取消",
-          style: "cancel"
-        }
-      ]
-    );
-  };
-
-  // ⭐⭐⭐ 逻辑更新：支持多图选择，并添加到 pendingImages 数组 ⭐⭐⭐
-  const pickImage = async () => {
-    const res = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!res.granted) return alert("需要图库权限");
-
-    const r2 = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
-      allowsMultipleSelection: true, // 启用多选
-    });
-    if (r2.canceled || !r2.assets) return;
-
-    // 将所有选中的 URI 添加到 pendingImages 数组中
-    const newUris = r2.assets.map(asset => asset.uri);
-    setPendingImages(prev => [...prev, ...newUris]);
-
+  // 自动滚动逻辑
+  const scrollToBottom = () => {
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
   };
 
-  // 2. 处理通用文件选择的函数
-  // ----------------------------------------------------
-  const handleDocumentPicker = async () => {
-    try {
-      // 在 Web 和某些平台上，DocumentPicker 不需要额外的权限
+  // 监听消息或附件变化，自动滚动
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, pendingImages, pendingFiles]);
 
-      const result = await DocumentPicker.getDocumentAsync({
-        // 选择所有文件类型
-        type: '*/*',
-        copyToCacheDirectory: true, // 建议复制到缓存目录，以确保 URI 可用
-        multiple: true, // 启用多选
-      });
+  // 统一发送处理
+  const onSend = () => {
+    handleSendMessage(input, pendingImages, pendingFiles);
 
-      // 检查是否取消或发生错误
-      if (result.canceled) {
-        return;
-      }
-
-      // 格式化结果为 PendingFile 接口需要的格式
-      const newFiles = result.assets.map(asset => ({
-        uri: asset.uri,
-        name: asset.name,
-        mimeType: asset.mimeType || 'application/octet-stream', // 使用 mimeType
-        size: asset.size || 0,
-      }));
-
-      // 更新文件状态
-      setPendingFiles(prev => [...prev, ...newFiles]);
-
-      // 滚动到底部 (假设 scrollRef 可用)
-      // setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
-
-    } catch (error) {
-      console.error("文件选择失败:", error);
-      alert("文件选择失败，请重试。");
-    }
+    // handleSendMessage(input);//测试版仅考虑文本消息
+    setInput("");
+    clearAttachments(); // 发送后清空附件
   };
 
-  const handleRenameConversation = (id: string, newName: string) => {
-    setConversations((prev) =>
-      prev.map((conv) =>
-        // 找到 id 匹配的会话，复制它并修改 title，其他会话保持不变
-        conv.id === id ? { ...conv, title: newName } : conv
-      )
-    );
+  // 2. 修改 onUploadPress，只负责打开 Modal
+  const onUploadPress = () => {
+    setUploadModalVisible(true);
   };
 
-  // 处理删除 (包含智能切换逻辑)
-  const handleDeleteConversation = (id: string) => {
-    // 1. 先过滤出删除后的新列表
-    const newConversations = conversations.filter((c) => c.id !== id);
+  // 3. 定义具体的选择处理函数 (连接 Modal 和 Hook)
+  const handleSelectImage = async () => {
+    const hasNew = await pickImage();
+    if (hasNew) scrollToBottom();
+  };
 
-    // 2. 更新列表状态
-    setConversations(newConversations);
-
-    // 3. 【重要】如果删除的是“当前选中的会话”，需要切换选中状态
-    if (id === activeConvId) {
-      if (newConversations.length > 0) {
-        // 还有其他会话，自动切换到第一个
-        setActiveConvId(newConversations[0].id);
-      } else {
-        // 如果删光了，创建一个新的默认会话 (这里假设你有一个 createConversation 函数)
-        // 如果没有 createConversation，可以设为空字符串或 null
-        createConversation();
-      }
-    }
+  const handleSelectDocument = async () => {
+    const hasNew = await pickDocument();
+    if (hasNew) scrollToBottom();
   };
 
   return (
     <View className={`flex-1 ${theme === "dark" ? "bg-black" : "bg-gray-100"}`}>
-      {/* 优化1：只处理顶部安全区域，消除底部 Tab 栏多余间距 */}
       <SafeAreaView className="flex-1" edges={["top"]}>
+        {/* 顶部栏 */}
         <TopBar
           theme={theme}
-          toggleTheme={() => setTheme(t => (t === "dark" ? "light" : "dark"))}
-          onOpenDrawer={() => setOpen(true)}
+          toggleTheme={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+          onOpenDrawer={() => setOpenDrawer(true)}
         />
 
         <View className={`flex-1 ${isLarge ? "flex-row" : "flex-col"}`}>
+          {/* 大屏侧边栏 */}
           {isLarge && (
             <DrawerMenu
               isOpen={true}
@@ -278,12 +106,12 @@ export default function HomeScreen() {
               setActiveConvId={setActiveConvId}
               createConversation={createConversation}
               theme={theme}
-              onRenameConversation={handleRenameConversation}
-              onDeleteConversation={handleDeleteConversation}
+              onRenameConversation={renameConversation}
+              onDeleteConversation={deleteConversation}
             />
           )}
 
-          {/* 优化2：键盘避让视图，确保输入框在键盘上方 */}
+          {/* 主聊天区域 */}
           <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -291,36 +119,41 @@ export default function HomeScreen() {
           >
             <MessageList messages={messages} theme={theme} ref={scrollRef} />
 
-            {/* ⭐⭐⭐ ChatInput 属性更新 ⭐⭐⭐ */}
             <ChatInput
               input={input}
               setInput={setInput}
-              pendingImages={pendingImages} // 传递数组
-              setPendingImages={setPendingImages} // 传递设置数组的函数
+              pendingImages={pendingImages}
+              setPendingImages={setPendingImages}
               pendingFiles={pendingFiles}
               setPendingFiles={setPendingFiles}
-              onSend={sendMessage}
-              onUpload={pickImage}
-              // onUpload={handleUpload}
+              onSend={onSend}
+              onUpload={onUploadPress} // 传递封装后的上传处理函数
               theme={theme}
               streaming={streaming}
             />
           </KeyboardAvoidingView>
         </View>
 
+        {/* 小屏侧边栏 (抽屉) */}
         {isSmall && (
           <DrawerMenu
-            isOpen={open}
-            onClose={() => setOpen(false)}
+            isOpen={openDrawer}
+            onClose={() => setOpenDrawer(false)}
             conversations={conversations}
             activeConvId={activeConvId}
             setActiveConvId={setActiveConvId}
             createConversation={createConversation}
             theme={theme}
-            onRenameConversation={handleRenameConversation}
-            onDeleteConversation={handleDeleteConversation}
+            onRenameConversation={renameConversation}
+            onDeleteConversation={deleteConversation}
           />
         )}
+        <UploadModal
+          visible={uploadModalVisible}
+          onClose={() => setUploadModalVisible(false)}
+          onSelectImage={handleSelectImage}
+          onSelectFile={handleSelectDocument}
+        />
       </SafeAreaView>
     </View>
   );

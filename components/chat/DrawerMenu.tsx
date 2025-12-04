@@ -284,7 +284,7 @@ export const DrawerMenu: React.FC<DrawerMenuProps> = ({
       </View>
 
       {/* 3. 底部用户信息 */}
-      <View style={{ borderTopWidth: 1, borderColor: borderColor, padding: 16, paddingBottom: Platform.OS === "ios" && !isSmall ? Math.max(insets.bottom, 20) : 20 }}>
+      {/* <View style={{ borderTopWidth: 1, borderColor: borderColor, padding: 16, paddingBottom: Platform.OS === "ios" && !isSmall ? Math.max(insets.bottom, 20) : 20 }}>
         <TouchableOpacity
           onPress={onOpenSettings}
           style={{
@@ -308,7 +308,7 @@ export const DrawerMenu: React.FC<DrawerMenuProps> = ({
           </View>
           <Settings size={20} color={textSecondary} />
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 

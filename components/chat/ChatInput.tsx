@@ -11,30 +11,10 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import "@/global.css";
+import { PendingFile,ChatInputProps } from "@/types/types";
 
 // 假设您有一个文件信息类型
 // 如果您使用 Expo/react-native-document-picker，它返回的可能是这样的结构
-interface PendingFile {
-  uri: string;
-  name: string; // 文件名
-  mimeType: string; // MIME 类型
-  size: number;
-}
-
-interface ChatInputProps {
-  input: string;
-  setInput: (text: string) => void;
-  pendingImages: string[];
-  setPendingImages: (uris: string[]) => void;
-  // ⭐ 新增: 待发送的文件列表
-  pendingFiles: PendingFile[];
-  setPendingFiles: (files: PendingFile[]) => void;
-  onSend: () => void;
-  // ⭐ 修改: onUpload 现在可以处理图片或文件选择
-  onUpload: () => void; 
-  theme: "dark" | "light";
-  streaming: boolean;
-}
 
 // Icon 组件（用于关闭按钮，使用 Text 代替）
 const CloseIcon = ({ color, size }: { color: string, size: number }) => (
@@ -190,7 +170,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           // ⭐ 更新 placeholder 提示
           placeholder={totalAttachments > 0 ? `添加文字描述 (共${totalAttachments}个附件)...` : "发送消息..."}
           placeholderTextColor="#888"
-          className={`flex-1 rounded-full pl-5 pr-5 pt-3 ${inputBg} text-black text-base h-4/5 custom-scrollbar overflow-auto`}
+          className={`flex-1 rounded-full pl-5 pr-5 ${inputBg} text-black text-base h-full custom-scrollbar overflow-auto`}
           multiline
           returnKeyType="send"
           onSubmitEditing={handleSend}

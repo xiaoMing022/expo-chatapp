@@ -13,6 +13,7 @@ interface Props {
 
 export const MessageList = forwardRef<ScrollView, Props>(
   ({ messages, theme }, ref) => {
+    console.log("[MessageList] 渲染消息列表，消息数量：", messages);
     return (
       <ScrollView
         ref={ref}
@@ -21,6 +22,7 @@ export const MessageList = forwardRef<ScrollView, Props>(
       >
         <View className="flex flex-col custom-scrollbar">
           {messages.map((msg) => (
+            
             <MessageBubble key={msg.id} msg={msg} theme={theme} />
           ))}
         </View>
